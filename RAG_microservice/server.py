@@ -3,7 +3,10 @@ from pydantic import BaseModel
 import uvicorn
 from ngrok_config import start_ngrok
 from llm import call_llm
-from hf_gemma import generate_embeddings
+from getEmbeddings import generate_embeddings
+from context import context
+from getEmbeddings import load_model_once
+from debug_logger import log_error
 
 class userQuery(BaseModel):
     query: str
@@ -13,13 +16,20 @@ class facts(BaseModel):
 
 
 app = FastAPI()
+load_model_once()
 
 @app.get("/callLLM/")
 async def process_data(query: userQuery):
-    llmResponse =await call_llm(query.query)
-    return {
-        "response":llmResponse
-    }
+
+    try:
+        contextString = context(query.query)
+        llmResponse =await call_llm(query.query, contextString)
+        return {
+            "response":llmResponse
+        }
+    except Exception as err:
+        log_error(err)
+        return {"error":str(err)}
 
 @app.post("/getEmbeddings/")
 def getEmbeddings(facts : facts):

@@ -1,6 +1,7 @@
-from hf_gemma import generate_embeddings
+from getEmbeddings import generate_embeddings
 from pinecone_config import index
 import time
+from debug_logger import log_error
 
 start_time = time.time()
 
@@ -15,7 +16,8 @@ dummy_data = [
     "The campus has sports facilities including cricket, football, and indoor stadiums.",
     "The official website of GBU provides information about admissions and courses.",
     "GBU emphasizes value-based education inspired by Buddhist principles.",
-    "Scholarships are available for meritorious and financially weaker students."
+    "Scholarships are available for meritorious and financially weaker students.",
+    "Gautam Buddha University has a website which is www.gbu.ac.in"
 ]
 
 try:
@@ -30,9 +32,12 @@ try:
         })
 
     index.upsert(vectors=to_upsert)
+    print(f"Input: {len(dummy_data)}, Output: {len(embeddings)}")
+
     end_time = time.time()
     print(f"Execution time: {end_time - start_time:.2f} seconds")
 except Exception as err:
+    log_error(err)
     print(f"Error! :\n{err}")
 
 

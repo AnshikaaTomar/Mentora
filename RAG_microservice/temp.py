@@ -35,3 +35,29 @@ def generate_embeddings(facts: list[str]):
 # Run it
 #embeddings = generate_embeddings(texts)
 #print(f"Generated embeddings shape: {len(embeddings)} x {len(embeddings[0])}")
+
+
+from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
+import os
+
+
+api_key = os.environ.get("GOOGLE_API_KEY")
+
+
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="gemini-embedding-001",   # or "gemini-embedding-001" depending on API naming
+    google_api_key=api_key
+)
+
+
+texts = [
+    "Artificial Intelligence is transforming the world.",
+    "I love coding in Python and JavaScript."
+]
+
+
+vectors = embeddings.embed_documents(texts)
+
+# Print results
+for i, v in enumerate(vectors):
+    print(f"Text {i+1} vector length: {len(v)}")
