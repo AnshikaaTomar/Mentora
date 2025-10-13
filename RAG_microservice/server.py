@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
 from ngrok_config import start_ngrok
@@ -7,6 +8,8 @@ from getEmbeddings import generate_embeddings
 from context import context
 from getEmbeddings import load_model_once
 from debug_logger import log_error
+from store_embeddings import upsertFacts
+
 
 class userQuery(BaseModel):
     query: str
@@ -37,6 +40,21 @@ def getEmbeddings(facts : facts):
     return {
         'embeddings' : response
     }
+
+@app.post('/upsertFacts')
+def upsertFacts(facts : facts):
+    try:
+        response = upsertFacts(facts.facts)
+
+        return {
+            'message' : "Data upserted successfully!",
+            'response' : response 
+        }
+    except Exception as err:
+        data = {
+            "error":str(err)
+        }
+        return JSONResponse(status_code=400,content=data)
 
 
 if __name__ == "__main__":

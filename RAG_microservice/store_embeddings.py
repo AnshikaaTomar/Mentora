@@ -3,7 +3,7 @@ from pinecone_config import index
 import time
 from debug_logger import log_error
 
-start_time = time.time()
+
 
 dummy_data = [
     "The School of Management at GBU is known for its MBA programs.",
@@ -20,24 +20,25 @@ dummy_data = [
     "Gautam Buddha University has a website which is www.gbu.ac.in"
 ]
 
-try:
-    embeddings = generate_embeddings(dummy_data)
-
-    to_upsert = []
-    for i, text in enumerate(dummy_data):
-        to_upsert.append({
-            "id": f"gbu-{i}",              # unique ID
-            "values": embeddings[i],
-            "metadata": {"text": text},
-        })
-
-    index.upsert(vectors=to_upsert)
-    print(f"Input: {len(dummy_data)}, Output: {len(embeddings)}")
-
-    end_time = time.time()
-    print(f"Execution time: {end_time - start_time:.2f} seconds")
-except Exception as err:
-    log_error(err)
-    print(f"Error! :\n{err}")
 
 
+def upsertFacts(data : list[str]):
+
+    try:
+        embeddings = generate_embeddings(data)
+
+        to_upsert = []
+        for i, text in enumerate(data):
+            to_upsert.append({
+                "id": f"gbu-{i}",              # unique ID
+                "values": embeddings[i],
+                "metadata": {"text": text},
+            })
+
+        index.upsert(vectors=to_upsert)
+        print(f"Input: {len(data)}, Output: {len(embeddings)}")
+
+        return f"Input: {len(data)}, Output: {len(embeddings)}"
+    except Exception as err:
+        log_error(err)
+        return f"Error! :\n{err}"

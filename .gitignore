@@ -2,3 +2,5 @@
 __pycache__
 .venv
 .vscode
+RAG_microservice/temp.py
+RAG_microservice/facts/
