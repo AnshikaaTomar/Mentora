@@ -2,7 +2,11 @@ import os
 import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import ChatPromptTemplate
+<<<<<<< HEAD
 from langchain.chains.llm import LLMChain
+=======
+from langchain.chains import LLMChain
+>>>>>>> a2db6d4b40d4bdc98d0a52fc0223a5ee359a6668
 from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 from debug_logger import log_error
