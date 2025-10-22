@@ -16,6 +16,10 @@ app.use(cors({
 app.use(express.json()); //every json that comes from frontend will be converted to js object. this function will work on every route.
 app.use(cookieParser());
 
+const authRouter = require("./src/routes/auth");
+
+app.use("",authRouter);
+
 connectDB()
     .then(()=>{
         console.log("DB connection established.");
