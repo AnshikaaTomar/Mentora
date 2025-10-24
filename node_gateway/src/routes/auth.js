@@ -9,7 +9,9 @@ const authorizeRole = require("../middlewares/authorizeRole");
 const { userAuth } = require("../middlewares/auth");
 const validator = require("validator");
 
-const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY
+const accessTokenKey = process.env.JWT_PRIVATE_KEY;
+const refrehTokenKey = process.env.REFRESH_PRIVATE_KEY;
+
 const authRouter = express.Router();
 
 authRouter.post("/createAdmin", async (req,res)=>{
@@ -79,7 +81,7 @@ authRouter.post("/signup",async(req,res)=>{
 
 authRouter.post("/login",async(req,res)=>{
     try {
-        const {email, password} = req.body;
+        const {email, password, keepMeSignedIn} = req.body;
 
         if (!email || !validator.isEmail(email)) {
             throw new Error("Invalid Credentials.");
