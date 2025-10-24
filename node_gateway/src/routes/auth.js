@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const {validateAdminSignUpData, validateSignUpData} = require("../utils/helperValidator");
+const RefreshTokenModel = require("../models/refreshToken");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -10,7 +11,7 @@ const { userAuth } = require("../middlewares/auth");
 const validator = require("validator");
 
 const accessTokenKey = process.env.JWT_PRIVATE_KEY;
-const refrehTokenKey = process.env.REFRESH_PRIVATE_KEY;
+const refreshTokenKey = process.env.REFRESH_PRIVATE_KEY;
 
 const authRouter = express.Router();
 
@@ -98,19 +99,41 @@ authRouter.post("/login",async(req,res)=>{
             throw new Error("Invalid Credentials.");
         }
         else{
-            const token = jwt.sign({_id : userData._id}, JWT_PRIVATE_KEY,{
-            expiresIn:"1d"
-            });
+            const accessToken = jwt.sign(
+                {_id : userData._id}, 
+                accessTokenKey,
+                {expiresIn:"3h"}
+            );
 
-            res.cookie("token",token, {
-                expires:new Date(Date.now()+24*3600000)
+            const refreshTokenExpiry = keepMeSignedIn ? "15d":"1d";
+
+            const refreshToken = jwt.sign(
+                {_id : userData._id}, 
+                refreshTokenKey, 
+                {expiresIn:refreshTokenExpiry}
+            );
+
+            const decodedPayload = jwt.decode(refreshToken);
+            await RefreshTokenModel.create({
+                token:refreshToken,
+                userId:userData._id,
+                expiresAt:new Date(decodedPayload.exp*1000)
+
+            })
+
+            res.cookie("refreshToken",refreshToken, {
+                expires:new Date(decodedPayload.exp*1000)
             });
                     
             const {_id,role,firstName,lastName,email,designation,createdAt}= userData;
             
                     
             res.status(200).json({
-               data:{ _id,role,firstName,lastName,email,designation,createdAt}
+               data:{ _id,role,firstName,lastName,email,designation,createdAt},
+               tokens : {
+                accessToken,
+                refreshToken
+               }
             });
         }
 
