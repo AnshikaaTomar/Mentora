@@ -27,3 +27,4 @@ def webSearch(query : str):
         print("Snippet:", item["snippet"])
         print()
 '''
+print(webSearch(query))

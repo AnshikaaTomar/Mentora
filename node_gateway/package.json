@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "gateway service for Mentora",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+ "scripts": {
+  "start": "node \"E:\\minor project\\node_gateway\\app.js\"",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
+
   "author": "Aman Yadav",
   "license": "ISC",
   "dependencies": {

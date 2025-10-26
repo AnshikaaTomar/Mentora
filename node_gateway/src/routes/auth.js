@@ -114,6 +114,9 @@ authRouter.post("/login",async(req,res)=>{
             );
 
             const decodedPayload = jwt.decode(refreshToken);
+
+            await RefreshTokenModel.deleteMany({ userId: userData._id });//delete any pre-existing tokens for the same user
+
             await RefreshTokenModel.create({
                 token:refreshToken,
                 userId:userData._id,
@@ -146,11 +149,42 @@ authRouter.post("/login",async(req,res)=>{
     }
 })
 
-authRouter.post("/logout",(req,res)=>{
-    res
-        .cookie("token",null,{
-            expires:new Date(Date.now())
-        })
-        .send("logout successful");
-})
+authRouter.post("/logout", async (req, res) => {
+  const { refreshToken } = req.cookies;
+  if (refreshToken) {
+    await RefreshTokenModel.deleteOne({ token: refreshToken });
+  }
+  res.clearCookie("refreshToken").json({ message: "Logout successful" });
+});
+
+
+authRouter.post("/refreshAccess", async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken)
+    return res.status(401).json({ message: "No refresh token provided" });
+
+  const stored = await RefreshTokenModel.findOne({ token: refreshToken });
+  if (!stored)
+    return res.status(403).json({ message: "Invalid refresh token" });
+
+  try {
+    const payload = jwt.verify(refreshToken, refreshTokenKey);
+    const accessToken = jwt.sign(
+      { _id: payload._id },
+      accessTokenKey,
+      { expiresIn: "15m" }
+    );
+    res.json({ accessToken });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      // Delete only if token is expired
+      await RefreshTokenModel.deleteOne({ token: refreshToken });
+      return res.status(403).json({ message: "Refresh token expired" });
+    }
+
+    // For other errors, don't delete immediately — possible tampering or malformed token
+    return res.status(403).json({ message: "Invalid refresh token" });
+  }
+});
+
 module.exports=authRouter;
